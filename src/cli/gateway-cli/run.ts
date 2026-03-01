@@ -9,6 +9,7 @@ import {
   resolveStateDir,
   resolveGatewayPort,
 } from "../../config/config.js";
+import { setConfigOverride } from "../../config/runtime-overrides.js";
 import { resolveGatewayAuth } from "../../gateway/auth.js";
 import { startGatewayServer } from "../../gateway/server.js";
 import type { GatewayWsLogStyle } from "../../gateway/ws-logging.js";
@@ -339,6 +340,20 @@ async function runGatewayCommand(opts: GatewayRunOpts) {
     );
     defaultRuntime.exit(1);
     return;
+  }
+
+  if (opts.allowUnconfigured && !configExists && bind !== "loopback") {
+    const hasAllowedOrigins =
+      Array.isArray(cfg.gateway?.controlUi?.allowedOrigins) &&
+      cfg.gateway?.controlUi?.allowedOrigins.length > 0;
+    const hasHostFallback =
+      cfg.gateway?.controlUi?.dangerouslyAllowHostHeaderOriginFallback === true;
+    if (!hasAllowedOrigins && !hasHostFallback) {
+      setConfigOverride("gateway.controlUi.dangerouslyAllowHostHeaderOriginFallback", true);
+      gatewayLog.warn(
+        "allow-unconfigured + non-loopback bind: enabling gateway.controlUi.dangerouslyAllowHostHeaderOriginFallback for bootstrap. Set gateway.controlUi.allowedOrigins (recommended) or disable Control UI once configured.",
+      );
+    }
   }
   const tailscaleOverride =
     tailscaleMode || opts.tailscaleResetOnExit

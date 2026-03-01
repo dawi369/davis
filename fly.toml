@@ -1,8 +1,8 @@
 # OpenClaw Fly.io deployment configuration
 # See https://fly.io/docs/reference/configuration/
 
-app = "openclaw"
-primary_region = "iad" # change to your closest region
+app = "davis"
+primary_region = "fra"
 
 [build]
 dockerfile = "Dockerfile"
@@ -13,9 +13,10 @@ NODE_ENV = "production"
 OPENCLAW_PREFER_PNPM = "1"
 OPENCLAW_STATE_DIR = "/data"
 NODE_OPTIONS = "--max-old-space-size=1536"
+NODE_LLAMA_CPP_CACHE_DIR = "/data/cache/node-llama-cpp"  # ← Critical for local embeddings
 
 [processes]
-app = "node dist/index.js gateway --allow-unconfigured --port 3000 --bind lan"
+app = "/data/startup.sh node dist/index.js gateway --allow-unconfigured --port 3000 --bind lan"
 
 [http_service]
 internal_port = 3000
@@ -30,5 +31,5 @@ size = "shared-cpu-2x"
 memory = "2048mb"
 
 [mounts]
-source = "openclaw_data"
+source = "davis_data"
 destination = "/data"
