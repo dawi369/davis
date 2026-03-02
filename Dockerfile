@@ -69,11 +69,11 @@ COPY --chown=node:node . .
 # Normalize copied plugin/agent paths so plugin safety checks do not reject
 # world-writable directories inherited from source file modes.
 RUN for dir in /app/extensions /app/.agent /app/.agents; do \
-      if [ -d "$dir" ]; then \
-        find "$dir" -type d -exec chmod 755 {} +; \
-        find "$dir" -type f -exec chmod 644 {} +; \
-      fi; \
-    done
+  if [ -d "$dir" ]; then \
+  find "$dir" -type d -exec chmod 755 {} +; \
+  find "$dir" -type f -exec chmod 644 {} +; \
+  fi; \
+  done
 RUN pnpm build
 # Force pnpm for UI build (Bun may fail on ARM/Synology architectures)
 ENV OPENCLAW_PREFER_PNPM=1
@@ -96,32 +96,32 @@ ARG CAMOUFOX_VERSION=135.0.1
 ARG CAMOUFOX_RELEASE=beta.24
 RUN apt-get update && \
   DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    libgtk-3-0 \
-    libdbus-glib-1-2 \
-    libxt6 \
-    libasound2 \
-    libx11-xcb1 \
-    libxcomposite1 \
-    libxcursor1 \
-    libxdamage1 \
-    libxfixes3 \
-    libxi6 \
-    libxrandr2 \
-    libxrender1 \
-    libxss1 \
-    libxtst6 \
-    fonts-liberation \
-    fonts-noto-color-emoji \
-    fontconfig \
-    unzip \
-    python3-minimal && \
+  libgtk-3-0 \
+  libdbus-glib-1-2 \
+  libxt6 \
+  libasound2 \
+  libx11-xcb1 \
+  libxcomposite1 \
+  libxcursor1 \
+  libxdamage1 \
+  libxfixes3 \
+  libxi6 \
+  libxrandr2 \
+  libxrender1 \
+  libxss1 \
+  libxtst6 \
+  fonts-liberation \
+  fonts-noto-color-emoji \
+  fontconfig \
+  unzip \
+  python3-minimal && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/* && \
   curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp \
-    -o /usr/local/bin/yt-dlp && chmod +x /usr/local/bin/yt-dlp && \
+  -o /usr/local/bin/yt-dlp && chmod +x /usr/local/bin/yt-dlp && \
   mkdir -p /root/.cache/camoufox && \
   curl -L -o /tmp/camoufox.zip \
-    "https://github.com/daijro/camoufox/releases/download/v${CAMOUFOX_VERSION}-${CAMOUFOX_RELEASE}/camoufox-${CAMOUFOX_VERSION}-${CAMOUFOX_RELEASE}-lin.x86_64.zip" && \
+  "https://github.com/daijro/camoufox/releases/download/v${CAMOUFOX_VERSION}-${CAMOUFOX_RELEASE}/camoufox-${CAMOUFOX_VERSION}-${CAMOUFOX_RELEASE}-lin.x86_64.zip" && \
   (unzip -q /tmp/camoufox.zip -d /root/.cache/camoufox || true) && \
   rm /tmp/camoufox.zip && \
   chmod -R 755 /root/.cache/camoufox && \
@@ -150,4 +150,4 @@ USER root
 #   2. Override CMD to include: "--bind", "lan"
 HEALTHCHECK --interval=3m --timeout=10s --start-period=15s --retries=3 \
   CMD node -e "fetch('http://127.0.0.1:18789/healthz').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
-CMD ["node", "openclaw.mjs", "gateway", "--allow-unconfigured"]
+CMD ["node", "openclaw.mjs", "gateway", "--allow-unconfigured", "--bind", "lan"]
