@@ -140,7 +140,11 @@ USER root
 #   - Use --network host, OR
 #   - Override --bind to "lan" (0.0.0.0) and set auth credentials
 #
-# For container platforms requiring external health checks:
+# Built-in probe endpoints for container health checks:
+#   - GET /healthz (liveness) and GET /readyz (readiness)
+#   - aliases: /health and /ready
+# For container platforms requiring external health checks from outside the
+# container network namespace:
 #   1. Set OPENCLAW_GATEWAY_TOKEN or OPENCLAW_GATEWAY_PASSWORD env var
-#   2. Override CMD: ["node","openclaw.mjs","gateway","--allow-unconfigured","--bind","lan"]
-CMD ["node","openclaw.mjs","gateway","--allow-unconfigured","--bind","lan"]
+#   2. Override CMD to include: "--bind", "lan"
+CMD ["node", "openclaw.mjs", "gateway", "--allow-unconfigured"]
