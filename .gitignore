@@ -120,3 +120,8 @@ dist/protocol.schema.json
 
 # Synthing
 **/.stfolder/
+
+# Sensitive credential files (never commit)
+x-proxy.txt
+x-cookies.txt
+x-robot.txt

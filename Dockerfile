@@ -32,7 +32,7 @@ RUN pnpm rebuild node-llama-cpp
 RUN /root/.bun/bin/bun install -g @tobilu/qmd && /root/.bun/bin/bun pm -g untrusted
 
 # Install ClawHub globally at build time
-RUN pnpm add -g clawhub
+RUN npm add -g clawhub
 
 # Optionally install Chromium and Xvfb for browser automation.
 # Build with: docker build --build-arg OPENCLAW_INSTALL_BROWSER=1 ...
@@ -67,6 +67,45 @@ RUN apt-get update && \
   DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends iproute2 vim && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
+
+# --- Camoufox (anti-detection Firefox) for camofox-browser plugin ---
+# System deps required by the Firefox-based Camoufox runtime,
+# plus pre-baked binary to avoid ~300MB download on every container start.
+ARG CAMOUFOX_VERSION=135.0.1
+ARG CAMOUFOX_RELEASE=beta.24
+RUN apt-get update && \
+  DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    libgtk-3-0 \
+    libdbus-glib-1-2 \
+    libxt6 \
+    libasound2 \
+    libx11-xcb1 \
+    libxcomposite1 \
+    libxcursor1 \
+    libxdamage1 \
+    libxfixes3 \
+    libxi6 \
+    libxrandr2 \
+    libxrender1 \
+    libxss1 \
+    libxtst6 \
+    fonts-liberation \
+    fonts-noto-color-emoji \
+    fontconfig \
+    unzip \
+    python3-minimal && \
+  apt-get clean && \
+  rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/* && \
+  curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp \
+    -o /usr/local/bin/yt-dlp && chmod +x /usr/local/bin/yt-dlp && \
+  mkdir -p /root/.cache/camoufox && \
+  curl -L -o /tmp/camoufox.zip \
+    "https://github.com/daijro/camoufox/releases/download/v${CAMOUFOX_VERSION}-${CAMOUFOX_RELEASE}/camoufox-${CAMOUFOX_VERSION}-${CAMOUFOX_RELEASE}-lin.x86_64.zip" && \
+  (unzip -q /tmp/camoufox.zip -d /root/.cache/camoufox || true) && \
+  rm /tmp/camoufox.zip && \
+  chmod -R 755 /root/.cache/camoufox && \
+  test -f /root/.cache/camoufox/camoufox-bin && \
+  echo "Camoufox binary installed successfully"
 
 ENV NODE_ENV=production
 
